@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interval DSA Platform</title>
+
+    <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, Arial;
+            display: flex;
+            height: 100vh;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .left {
+            width: 40%;
+            overflow-y: auto;
+            padding: 20px;
+            border-right: 1px solid #1e293b;
+        }
+
+        .right {
+            width: 60%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .problem {
+            margin-bottom: 16px;
+            padding: 16px;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            background: #020617;
+        }
+
+        h3 {
+            margin: 0 0 10px 0;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .solution {
+            display: none;
+            margin-top: 10px;
+        }
+
+        #editor {
+            height: 60%;
+        }
+
+        .toolbar {
+            padding: 10px;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            gap: 10px;
+        }
+
+        .output {
+            height: 40%;
+            background: #020617;
+            border-top: 1px solid #1e293b;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .status {
+            font-size: 12px;
+            margin-left: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="left">
+
+        <div class="problem">
+            <h3>1. Merge Intervals</h3>
+            <p><b>Problem:</b> Merge overlapping intervals.</p>
+            <p><b>Input:</b> [[1,3],[2,6],[8,10],[15,18]]</p>
+            <p><b>Output:</b> [[1,6],[8,10],[15,18]]</p>
+            <button onclick="toggle('sol1')">View Solution</button>
+            <div id="sol1" class="solution">
+                <pre>
+fun merge(intervals: Array<IntArray>): List<IntArray> {
+    intervals.sortBy { it[0] }
+    val result = mutableListOf<IntArray>()
+    var current = intervals[0]
+
+    for (i in 1 until intervals.size) {
+        val next = intervals[i]
+        if (next[0] <= current[1]) {
+            current[1] = maxOf(current[1], next[1])
+        } else {
+            result.add(current)
+            current = next
+        }
+    }
+    result.add(current)
+    return result
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>2. Meeting Rooms II</h3>
+            <p><b>Problem:</b> Find minimum meeting rooms required.</p>
+            <p><b>Input:</b> [[0,30],[5,10],[15,20]]</p>
+            <p><b>Output:</b> 2</p>
+            <button onclick="toggle('sol2')">View Solution</button>
+            <div id="sol2" class="solution">
+                <pre>
+fun minMeetingRooms(intervals: Array<IntArray>): Int {
+    intervals.sortBy { it[0] }
+    val heap = java.util.PriorityQueue<Int>()
+
+    for (interval in intervals) {
+        if (heap.isNotEmpty() && heap.peek() <= interval[0]) heap.poll()
+        heap.offer(interval[1])
+    }
+    return heap.size
+}
+</pre>
+            </div>
+        </div>
+
+        <!-- ADDITIONAL PROBLEMS -->
+
+        <div class="problem">
+            <h3>3. Non-overlapping Intervals</h3>
+            <p><b>Problem:</b> Find minimum intervals to remove to eliminate overlaps.</p>
+            <p><b>Input:</b> [[1,2],[2,3],[3,4],[1,3]]</p>
+            <p><b>Output:</b> 1</p>
+            <button onclick="toggle('sol3')">View Solution</button>
+            <div id="sol3" class="solution">
+                <pre>
+fun eraseOverlapIntervals(intervals: Array<IntArray>): Int {
+    intervals.sortBy { it[1] }
+    var count = 0
+    var prevEnd = intervals[0][1]
+    for (i in 1 until intervals.size) {
+        if (intervals[i][0] < prevEnd) count++
+        else prevEnd = intervals[i][1]
+    }
+    return count
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>4. Meeting Rooms I</h3>
+            <p><b>Problem:</b> Check if all meetings can be attended.</p>
+            <p><b>Input:</b> [[0,30],[5,10],[15,20]]</p>
+            <p><b>Output:</b> false</p>
+            <button onclick="toggle('sol4')">View Solution</button>
+            <div id="sol4" class="solution">
+                <pre>
+fun canAttendMeetings(intervals: Array<IntArray>): Boolean {
+    intervals.sortBy { it[0] }
+    for (i in 1 until intervals.size) {
+        if (intervals[i][0] < intervals[i-1][1]) return false
+    }
+    return true
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>5. Interval Intersection</h3>
+            <p><b>Problem:</b> Find intersections between two interval lists.</p>
+            <p><b>Input:</b> [[0,2],[5,10]] & [[1,5],[8,12]]</p>
+            <p><b>Output:</b> [[1,2],[5,5],[8,10]]</p>
+            <button onclick="toggle('sol5')">View Solution</button>
+            <div id="sol5" class="solution">
+                <pre>
+fun intervalIntersection(A: Array<IntArray>, B: Array<IntArray>): List<IntArray> {
+    val result = mutableListOf<IntArray>()
+    var i = 0
+    var j = 0
+    while (i < A.size && j < B.size) {
+        val start = maxOf(A[i][0], B[j][0])
+        val end = minOf(A[i][1], B[j][1])
+        if (start <= end) result.add(intArrayOf(start, end))
+        if (A[i][1] < B[j][1]) i++ else j++
+    }
+    return result
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>6. Minimum Arrows</h3>
+            <p><b>Problem:</b> Minimum arrows to burst balloons.</p>
+            <p><b>Input:</b> [[10,16],[2,8],[1,6],[7,12]]</p>
+            <p><b>Output:</b> 2</p>
+            <button onclick="toggle('sol6')">View Solution</button>
+            <div id="sol6" class="solution">
+                <pre>
+fun findMinArrowShots(points: Array<IntArray>): Int {
+    points.sortBy { it[1] }
+    var arrows = 1
+    var end = points[0][1]
+    for (i in 1 until points.size) {
+        if (points[i][0] > end) {
+            arrows++
+            end = points[i][1]
+        }
+    }
+    return arrows
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>7. Employee Free Time</h3>
+            <p><b>Problem:</b> Given schedules of employees, return common free time intervals.</p>
+            <p><b>Input:</b> [[[1,2],[5,6]], [[1,3]], [[4,10]]]</p>
+            <p><b>Output:</b> [[3,4]]</p>
+            <button onclick="toggle('sol7')">View Solution</button>
+            <div id="sol7" class="solution">
+                <pre>
+fun employeeFreeTime(schedule: List<List<IntArray>>): List<IntArray> {
+    val all = schedule.flatten().toTypedArray()
+    all.sortBy { it[0] }
+    val merged = mutableListOf<IntArray>()
+    var cur = all[0]
+    for (i in 1 until all.size) {
+        val n = all[i]
+        if (n[0] <= cur[1]) cur[1] = maxOf(cur[1], n[1])
+        else { merged.add(cur); cur = n }
+    }
+    merged.add(cur)
+    val res = mutableListOf<IntArray>()
+    for (i in 1 until merged.size) {
+        res.add(intArrayOf(merged[i-1][1], merged[i][0]))
+    }
+    return res
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>8. Remove Covered Intervals</h3>
+            <p><b>Problem:</b> Remove intervals covered by another.</p>
+            <p><b>Input:</b> [[1,4],[3,6],[2,8]]</p>
+            <p><b>Output:</b> 2</p>
+            <button onclick="toggle('sol8')">View Solution</button>
+            <div id="sol8" class="solution">
+                <pre>
+fun removeCoveredIntervals(intervals: Array<IntArray>): Int {
+    intervals.sortWith(compareBy({ it[0] }, { -it[1] }))
+    var count = 0
+    var end = 0
+    for (it in intervals) {
+        if (it[1] > end) { count++; end = it[1] }
+    }
+    return count
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>9. Summary Ranges</h3>
+            <p><b>Problem:</b> Convert sorted array into range strings.</p>
+            <p><b>Input:</b> [0,1,2,4,5,7]</p>
+            <p><b>Output:</b> ["0->2","4->5","7"]</p>
+            <button onclick="toggle('sol9')">View Solution</button>
+            <div id="sol9" class="solution">
+                <pre>
+fun summaryRanges(nums: IntArray): List<String> {
+    val res = mutableListOf<String>()
+    var start = nums[0]
+    for (i in 1..nums.size) {
+        if (i == nums.size || nums[i] != nums[i-1] + 1) {
+            if (start == nums[i-1]) res.add("$start")
+            else res.add("$start->${nums[i-1]}")
+            if (i < nums.size) start = nums[i]
+        }
+    }
+    return res
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>10. Partition Labels</h3>
+            <p><b>Problem:</b> Partition string so each char appears in one part.</p>
+            <p><b>Input:</b> ababcbacadefegdehijhklij</p>
+            <p><b>Output:</b> [9,7,8]</p>
+            <button onclick="toggle('sol10')">View Solution</button>
+            <div id="sol10" class="solution">
+                <pre>
+fun partitionLabels(s: String): List<Int> {
+    val last = IntArray(26)
+    for (i in s.indices) last[s[i]-'a'] = i
+    val res = mutableListOf<Int>()
+    var start = 0; var end = 0
+    for (i in s.indices) {
+        end = maxOf(end, last[s[i]-'a'])
+        if (i == end) { res.add(end-start+1); start = i+1 }
+    }
+    return res
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>11. Task Scheduler</h3>
+            <p><b>Problem:</b> Schedule tasks with cooldown n.</p>
+            <p><b>Input:</b> [A,A,A,B,B,B], n=2</p>
+            <p><b>Output:</b> 8</p>
+            <button onclick="toggle('sol11')">View Solution</button>
+            <div id="sol11" class="solution">
+                <pre>
+fun leastInterval(tasks: CharArray, n: Int): Int {
+    val freq = IntArray(26)
+    for (t in tasks) freq[t-'A']++
+    val pq = java.util.PriorityQueue<Int>(compareByDescending{it})
+    freq.filter{it>0}.forEach{pq.add(it)}
+    var time=0
+    while (pq.isNotEmpty()) {
+        val temp = mutableListOf<Int>()
+        for (i in 0..n) {
+            if (pq.isNotEmpty()) {
+                val c = pq.poll()-1
+                if (c>0) temp.add(c)
+            }
+            time++
+            if (pq.isEmpty() && temp.isEmpty()) break
+        }
+        temp.forEach{pq.add(it)}
+    }
+    return time
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>12. Maximum Events</h3>
+            <p><b>Problem:</b> Attend max events (one per day).</p>
+            <p><b>Input:</b> [[1,2],[2,3],[3,4]]</p>
+            <p><b>Output:</b> 3</p>
+            <button onclick="toggle('sol12')">View Solution</button>
+            <div id="sol12" class="solution">
+                <pre>
+fun maxEvents(events: Array<IntArray>): Int {
+    events.sortBy{it[0]}
+    val pq = java.util.PriorityQueue<Int>()
+    var day=0; var i=0; var res=0
+    while (i<events.size || pq.isNotEmpty()) {
+        if (pq.isEmpty()) day = events[i][0]
+        while (i<events.size && events[i][0]==day) pq.add(events[i++][1])
+        pq.poll(); res++; day++
+        while (pq.isNotEmpty() && pq.peek()<day) pq.poll()
+    }
+    return res
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>13. Car Pooling</h3>
+            <p><b>Problem:</b> Check if capacity exceeded.</p>
+            <p><b>Input:</b> [[2,1,5],[3,3,7]], cap=4</p>
+            <p><b>Output:</b> false</p>
+            <button onclick="toggle('sol13')">View Solution</button>
+            <div id="sol13" class="solution">
+                <pre>
+fun carPooling(trips: Array<IntArray>, cap: Int): Boolean {
+    val map = java.util.TreeMap<Int,Int>()
+    for (t in trips) {
+        map[t[1]] = map.getOrDefault(t[1],0)+t[0]
+        map[t[2]] = map.getOrDefault(t[2],0)-t[0]
+    }
+    var curr=0
+    for (v in map.values) {
+        curr+=v
+        if (curr>cap) return false
+    }
+    return true
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>14. Maximum Overlap</h3>
+            <p><b>Problem:</b> Find max overlapping intervals.</p>
+            <p><b>Input:</b> [[1,3],[2,5],[4,6]]</p>
+            <p><b>Output:</b> 2</p>
+            <button onclick="toggle('sol14')">View Solution</button>
+            <div id="sol14" class="solution">
+                <pre>
+fun maxOverlap(intervals: Array<IntArray>): Int {
+    val map = java.util.TreeMap<Int,Int>()
+    for (it in intervals) {
+        map[it[0]] = map.getOrDefault(it[0],0)+1
+        map[it[1]] = map.getOrDefault(it[1],0)-1
+    }
+    var max=0; var curr=0
+    for (v in map.values) {
+        curr+=v
+        max = maxOf(max,curr)
+    }
+    return max
+}
+</pre>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h3>15. Insert Interval</h3>
+            <p><b>Problem:</b> Insert and merge interval.</p>
+            <p><b>Input:</b> [[1,3],[6,9]], new=[2,5]</p>
+            <p><b>Output:</b> [[1,5],[6,9]]</p>
+            <button onclick="toggle('sol15')">View Solution</button>
+            <div id="sol15" class="solution">
+                <pre>
+fun insert(intervals: Array<IntArray>, newI: IntArray): List<IntArray> {
+    val res = mutableListOf<IntArray>()
+    var i=0
+    while (i<intervals.size && intervals[i][1] < newI[0]) res.add(intervals[i++])
+    var cur = newI
+    while (i<intervals.size && intervals[i][0] <= cur[1]) {
+        cur[0] = minOf(cur[0], intervals[i][0])
+        cur[1] = maxOf(cur[1], intervals[i][1])
+        i++
+    }
+    res.add(cur)
+    while (i<intervals.size) res.add(intervals[i++])
+    return res
+}
+</pre>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="right">
+    
+        <div class="toolbar">
+            <button onclick="runCode()">Run</button>
+            <button onclick="checkBraces()">Check Braces</button>
+            <span id="status" class="status"></span>
+        </div>
+    
+        <div id="editor"></div>
+        <div id="output" class="output"></div>
+    
+    </div>
+
+    <script>
+
+        function toggle(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        let editorInstance;
+
+        require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            const container = document.getElementById('editor');
+
+            if (!container) {
+                console.error('Editor container not found');
+                return;
+            }
+
+            editorInstance = monaco.editor.create(container, {
+                value: `fun main(args: Array<String>) {
+    println("Hello Kotlin")
+}`,
+                language: 'kotlin',
+                theme: 'vs-dark'
+            });
+
+            // Safe resize handling
+            window.addEventListener('resize', () => {
+                if (editorInstance) {
+                    requestAnimationFrame(() => editorInstance.layout());
+                }
+            });
+        });
+
+
+        function checkBraces() {
+            const code = editorInstance.getValue();
+            let stack = [];
+            for (let ch of code) {
+                if (ch === '{') stack.push(ch);
+                if (ch === '}') {
+                    if (!stack.length) return setStatus("Unmatched closing brace", true);
+                    stack.pop();
+                }
+            }
+            if (stack.length) setStatus("Unmatched opening brace", true);
+            else setStatus("Braces OK", false);
+        }
+
+        function setStatus(msg, error) {
+            const el = document.getElementById('status');
+            el.innerText = msg;
+            el.style.color = error ? 'red' : 'lightgreen';
+        }
+
+        async function runCode() {
+            try {
+                const code = editorInstance.getValue();
+
+                const response = await fetch("https://localhost:3000/run", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ code })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.status);
+                }
+
+                const result = await response.json();
+
+                document.getElementById('output').innerText =
+                    result.output || result.error || "No output";
+
+            } catch (error) {
+                document.getElementById('output').innerText =
+                    "Execution Error: " + error.message;
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
